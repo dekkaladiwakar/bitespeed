@@ -3,6 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
+import { CustomerHttpModule } from './customer-http/customer-http.module';
+import { CustomerModule } from './customer/customer.module';
+import entities from './entities';
 
 @Module({
   imports: [
@@ -17,13 +21,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [],
+        entities: entities,
         synchronize: true,
         logging: true,
       }),
     }),
+    CustomerModule,
+    CustomerHttpModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}
