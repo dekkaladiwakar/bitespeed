@@ -1,10 +1,10 @@
 import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 
 // Reference:
@@ -18,41 +18,23 @@ import {
 //   updatedAt            DateTime
 //   deletedAt            DateTime?
 // }
-@Entity()
+
+@Entity('customers')
 export class Customer {
-  @PrimaryGeneratedColumn({
-    type: 'int',
-    name: 'id',
-  })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    name: 'phone_number',
-    nullable: false,
-    default: '',
-  })
+  @Column({ nullable: true })
   phoneNumber: string;
 
-  @Column({
-    name: 'email',
-    nullable: false,
-    default: '',
-  })
+  @Column({ nullable: true })
   email: string;
 
-  @Column({
-    name: 'linked_id',
-    nullable: false,
-    default: '',
-  })
-  linkedId: string;
+  @Column({ nullable: true })
+  linkedId: number;
 
-  @Column({
-    name: 'link_preference',
-    nullable: false,
-    default: '',
-  })
-  linkPreference: string;
+  @Column({ type: 'enum', enum: ['primary', 'secondary'], default: 'primary' })
+  linkPrecedence: 'primary' | 'secondary';
 
   @CreateDateColumn()
   createdAt: Date;
