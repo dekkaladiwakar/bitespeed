@@ -3,11 +3,13 @@ import {
   Controller,
   Get,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { CustomerHttpService } from './customer-http.service';
 import { CreateCustomerDto, FindCustomerDto } from './customer-http.dto';
+import { AlwaysBlockGuard } from '../common/guards/block.guard';
 
 @Controller('customer')
 @UsePipes(ValidationPipe)
@@ -24,6 +26,7 @@ export class CustomerHttpController {
     return this.customerHttpService.getCustomerDetails(findCustomerDto);
   }
 
+  @UseGuards(AlwaysBlockGuard)
   @Get('all')
   findAll() {
     return this.customerHttpService.findAll();
