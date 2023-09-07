@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CustomerService } from '../customer/customer.service';
-import { CreateCustomerDto } from './customer-http.dto';
+import { CreateCustomerDto, FindCustomerDto } from './customer-http.dto';
 
 @Injectable()
 export class CustomerHttpService {
@@ -9,6 +9,13 @@ export class CustomerHttpService {
     return this.customerService.createOrUpdateCustomer(
       createCustomerDto.email,
       createCustomerDto.phoneNumber,
+    );
+  }
+
+  getCustomerDetails(findCustomerDto: FindCustomerDto) {
+    return this.customerService.getCustomerDetails(
+      findCustomerDto.email,
+      findCustomerDto.phoneNumber,
     );
   }
 

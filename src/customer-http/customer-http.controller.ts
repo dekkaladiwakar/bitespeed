@@ -7,7 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CustomerHttpService } from './customer-http.service';
-import { CreateCustomerDto } from './customer-http.dto';
+import { CreateCustomerDto, FindCustomerDto } from './customer-http.dto';
 
 @Controller('customer')
 @UsePipes(ValidationPipe)
@@ -17,6 +17,11 @@ export class CustomerHttpController {
   @Post('add')
   createOrUpdateCustomer(@Body() createCustomerDto: CreateCustomerDto) {
     return this.customerHttpService.createOrUpdateCustomer(createCustomerDto);
+  }
+
+  @Post('find')
+  getCustomerDetails(@Body() findCustomerDto: FindCustomerDto) {
+    return this.customerHttpService.getCustomerDetails(findCustomerDto);
   }
 
   @Get('all')

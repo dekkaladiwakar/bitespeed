@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Index,
 } from 'typeorm';
 
 // Reference:
@@ -20,6 +21,9 @@ import {
 // }
 
 @Entity('customers')
+@Index('email_index', ['email'])
+@Index('phone_index', ['phoneNumber'])
+@Index('linkPrecedence_index', ['linkPrecedence'])
 export class Customer {
   @PrimaryGeneratedColumn()
   id: number;

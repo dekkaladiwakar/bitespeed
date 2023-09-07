@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Customer } from './customer.entity';
 import { Repository } from 'typeorm';
@@ -14,7 +14,7 @@ export class CustomerService {
     email: string,
     phoneNumber: string,
   ): Promise<Customer> {
-    // First, search for primary customers
+    // First, search for primary contacts
     const existingPrimaryCustomer = await this.customerRepository.findOne({
       where: [
         { email, linkPrecedence: 'primary' },
@@ -30,7 +30,7 @@ export class CustomerService {
         linkPrecedence: 'secondary',
       });
     } else {
-      // If no primary customers are found, run a more general search
+      // If no primary contacts are found, run a more general search
       const existingCustomers = await this.customerRepository.find({
         where: [{ email }, { phoneNumber }],
       });
@@ -63,5 +63,60 @@ export class CustomerService {
 
   findAll(): Promise<Customer[]> {
     return this.customerRepository.find();
+  }
+
+  async getCustomerDetails(email: string, phoneNumber: string): Promise<any> {
+    let rootPrimaryContact: any;
+
+    // Find the contact based on email or phone number
+    const initialContact = await this.customerRepository
+      .createQueryBuilder('customer')
+      .where('customer.email = :email OR customer.phoneNumber = :phoneNumber', {
+        email,
+        phoneNumber,
+      })
+      .andWhere('customer.deletedAt IS NULL')
+      .getOne();
+
+    if (!initialContact) {
+      throw new NotFoundException('Contact not found');
+    }
+
+    // Determine if this contact is a primary or linked to another primary contact
+    if (initialContact.linkPrecedence === 'primary') {
+      rootPrimaryContact = initialContact;
+    } else {
+      rootPrimaryContact = await this.customerRepository.findOne({
+        where: { id: initialContact.linkedId },
+      });
+    }
+
+    // Find the secondary contacts
+    const secondaryContacts = await this.customerRepository
+      .createQueryBuilder('customer')
+      .select(['customer.id', 'customer.email', 'customer.phoneNumber'])
+      .where('customer.linkedId = :linkedId', {
+        linkedId: rootPrimaryContact.id,
+      })
+      .andWhere('customer.deletedAt IS NULL')
+      .getMany();
+
+    // Format the response
+    const response = {
+      contact: {
+        primaryContactId: rootPrimaryContact.id,
+        emails: [
+          rootPrimaryContact.email,
+          ...secondaryContacts.map((c) => c.email).filter((e) => e),
+        ],
+        phoneNumbers: [
+          rootPrimaryContact.phoneNumber,
+          ...secondaryContacts.map((c) => c.phoneNumber).filter((p) => p),
+        ],
+        secondaryContactIds: secondaryContacts.map((c) => c.id),
+      },
+    };
+
+    return response;
   }
 }
